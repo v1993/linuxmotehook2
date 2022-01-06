@@ -44,7 +44,9 @@ namespace Linuxmotehook {
 		}
 
 		~Server() {
-			monitor_source.destroy();
+			if (monitor_source != null)
+				monitor_source.destroy();
+
 			new LMApplication().release();
 		}
 
@@ -58,29 +60,17 @@ namespace Linuxmotehook {
 		private void add_wiimote(string path) {
 			try {
 				var dev = XWiimote.Device.create(path);
-				add_wiimote_device(dev);
-			} catch(Error e) {
-				warning("Failed to open wiimote: %s", e.message);
-			}
-		}
-
-		private void add_wiimote_device(XWiimote.Device dev) {
-			try {
 				if (dev.get_devtype() == "unknown") {
 					// This commonly happens for hotplug, so retry once device is ready
 					// Note: these callbacks hold owning reference
 					GLib.Timeout.add(500, () => {
-						add_wiimote_device(dev);
+						add_wiimote(path);
 						return Source.REMOVE;
 					});
 					return;
 				}
 
-				// TODO: code for actually adding wiimote to server
-				print("Device MAC: 0x%llX\n", dev.get_mac());
-				print("Device type: %s\n", dev.get_devtype());
-				print("Extension type: %s\n", dev.get_extension());
-				print("Battery: %d\n", dev.get_battery());
+				add_device(new MainDevice((owned)dev));
 			} catch(Error e) {
 				warning("Failed to add wiimote: %s", e.message);
 			}

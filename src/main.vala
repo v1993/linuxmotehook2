@@ -22,10 +22,24 @@ using Linuxmotehook;
 
 extern const string LM_VERSION;
 
+/*
+// To be implemented in gcemuhook
+enum DeviceOrientation {
+	NORAML,
+	SIDEWAYS,
+	NORMAL_INVERTED
+}*/
+
 [SingleInstance]
 class LMApplication : Application {
 	private bool exit_scheduled = false;
 	public Server? server;
+
+	public bool send_buttons { get; private set; default = true; } // FIXME: defualt false
+	public bool send_ir { get; private set; default = true; } // FIXME: defualt false
+
+	public float AccelUnitsPerG { get; private set; default = 103f; }
+	public float GyroUnitsPerDegPerSec { get; private set; default = 335160f/1860f; }
 
 	construct {
 		application_id = "org.v1993.linuxmotehook2";

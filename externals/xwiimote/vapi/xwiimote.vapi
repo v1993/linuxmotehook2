@@ -20,7 +20,7 @@ namespace XWiimote {
 		}
 	}
 
-	[CCode (cname = "xwii_event_types", cprefix = "XWII_EVENT_", has_type_id = false)]
+	[CCode (cname = "enum xwii_event_types", cprefix = "XWII_EVENT_", has_type_id = false)]
 	public enum EventType {
 		KEY,
 		ACCEL,
@@ -42,7 +42,7 @@ namespace XWiimote {
 	}
 
 	// Note: enum name differs a bit
-	[CCode (cname = "xwii_event_keys", cprefix = "XWII_KEY_", has_type_id = false)]
+	[CCode (cname = "enum xwii_event_keys", cprefix = "XWII_KEY_", has_type_id = false)]
 	public enum EventKeyCode {
 		LEFT,
 		RIGHT,
@@ -102,7 +102,7 @@ namespace XWiimote {
 		int32 z;
 	}
 
-	[CCode (cname = "xwii_drums_abs", cprefix = "XWII_DRUMS_ABS_", has_type_id = false)]
+	[CCode (cname = "enum xwii_drums_abs", cprefix = "XWII_DRUMS_ABS_", has_type_id = false)]
 	public enum DrumAbs {
 		PAD,
 		CYMBAL_LEFT,
@@ -136,7 +136,7 @@ namespace XWiimote {
 
 	bool event_ir_is_valid(EventAbs abs);
 
-	[CCode (cname = "xwii_iface_type", cprefix = "XWII_IFACE_", has_type_id = false)]
+	[CCode (cname = "enum xwii_iface_type", cprefix = "XWII_IFACE_", has_type_id = false)]
 	[Flags]
 	enum IfaceType {
 		CORE,
@@ -223,6 +223,11 @@ namespace XWiimote {
 
 		[CCode (cname = "xwii_iface_dispatch")]
 		private int _dispatch(out Event ev, size_t size);
+
+		[CCode (cname = "xwii_iface_poll_vala")]
+		public Event? poll() throws GLib.IOError {
+			return dispatch();
+		}
 
 		[CCode (cname = "xwii_iface_dispatch_vala")]
 		public Event? dispatch() throws GLib.IOError {
