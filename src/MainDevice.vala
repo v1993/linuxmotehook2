@@ -119,13 +119,15 @@ namespace Linuxmotehook {
 			// Extension interfaces need some time to initialize
 
 			if (initial_call) {
-				update_external_interfaces();
+				update_external_interfaces(true);
 			} else {
-				GLib.Timeout.add(500, update_external_interfaces);
+				GLib.Timeout.add(500, update_external_interfaces_wrapper);
 			}
 		}
 
-		private bool update_external_interfaces() {
+		private bool update_external_interfaces_wrapper() { return update_external_interfaces(); }
+
+		private bool update_external_interfaces(bool initial_call = false) {
 			var available = dev.available();
 			var opened = dev.opened();
 			var unopened = available & ~opened;
@@ -152,7 +154,7 @@ namespace Linuxmotehook {
 				}
 			}
 
-			if ((extension != null) && (extension.implements_interface in unopened)) {
+			if ((!initial_call) && (extension != null) && (extension.implements_interface in unopened)) {
 				unowned var server = new LMApplication().server;
 				if (server != null) {
 					try {
