@@ -18,3 +18,31 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+namespace Linuxmotehook {
+	/*
+	 * Main device takes care of disconnecting and updating extensions.
+	 *
+	 * As such, they only need to implement reporting relevant data.
+	 */
+	abstract class ExtensionDevice : Object, Cemuhook.AbstractPhysicalDevice {
+		public XWiimote.IfaceType implements_interface { get; protected construct set; }
+		public uint64 mac_bitmask { get; protected construct set; }
+		public weak MainDevice parent { get; private construct set; }
+
+		public uint64 get_mac() {
+			return parent.get_mac() ^ mac_bitmask;
+		}
+
+		public abstract Cemuhook.DeviceType get_device_type();
+		public abstract Cemuhook.BaseData get_base_inputs();
+		public abstract void process_event(XWiimote.Event ev);
+
+		public virtual uint64 get_motion_timestamp() { assert_not_reached(); }
+		public virtual Cemuhook.MotionData get_accelerometer() { assert_not_reached(); }
+		public virtual Cemuhook.MotionData get_gyro() { assert_not_reached(); }
+
+		protected ExtensionDevice(MainDevice parent) {
+			this.parent = parent;
+		}
+	}
+}

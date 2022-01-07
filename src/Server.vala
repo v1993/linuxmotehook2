@@ -63,7 +63,7 @@ namespace Linuxmotehook {
 				if (dev.get_devtype() == "unknown") {
 					// This commonly happens for hotplug, so retry once device is ready
 					// Note: these callbacks hold owning reference
-					GLib.Timeout.add(500, () => {
+					GLib.Timeout.add(1000, () => {
 						add_wiimote(path);
 						return Source.REMOVE;
 					});

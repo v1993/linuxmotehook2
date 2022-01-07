@@ -4,6 +4,8 @@ linuxmotehook2_sources = [
   'Nunchuck.vala',
   'Server.vala',
 
+  'Utils.vala',
+
   'main.vala'
 ]
 

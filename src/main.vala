@@ -39,7 +39,9 @@ class LMApplication : Application {
 	public bool send_ir { get; private set; default = true; } // FIXME: defualt false
 
 	public float AccelUnitsPerG { get; private set; default = 103f; }
-	public float GyroUnitsPerDegPerSec { get; private set; default = 335160f/1860f; }
+	public float GyroUnitsPerDegPerSec { get; private set; default = 1.05f*335160f/1860f; }
+
+	public float NunchuckAccelUnitsPerG { get; private set; default = 205f; }
 
 	construct {
 		application_id = "org.v1993.linuxmotehook2";
@@ -47,7 +49,13 @@ class LMApplication : Application {
 	}
 
 	public override void activate() {
-		hold();
+		try {
+			hold();
+			server = new Server();
+		} catch(Error e) {
+			print("Failed to start server: %s\n", e.message);
+			return;
+		}
 	}
 
 	public override int handle_local_options(VariantDict options) {
@@ -71,16 +79,10 @@ class LMApplication : Application {
 }
 
 int main(string[] args) {
-	try {
-		var app = new LMApplication();
-		app.server = new Server();
-		GLib.Unix.signal_add(2, app.handle_shutdown_signal);
-		GLib.Unix.signal_add(15, app.handle_shutdown_signal);
-		app.run(args);
-	} catch(Error e) {
-		print(@"Runtime error: $(e.message)\n");
-		return 1;
-	}
+	var app = new LMApplication();
+	GLib.Unix.signal_add(2, app.handle_shutdown_signal);
+	GLib.Unix.signal_add(15, app.handle_shutdown_signal);
+	app.run(args);
 
 	return 0;
 }

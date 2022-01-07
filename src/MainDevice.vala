@@ -31,6 +31,12 @@ namespace Linuxmotehook {
 		private Cemuhook.MotionData gyroscope = {0f, 0f, 0f};
 		private uint64 mac = 0;
 
+		private ExtensionDevice? extension = null;
+
+		construct {
+			added.connect(on_added);
+		}
+
 		public MainDevice(owned XWiimote.Device dev) throws Error {
 			this.dev = dev;
 			dev.watch(true);
@@ -41,16 +47,17 @@ namespace Linuxmotehook {
 			dev_source.set_callback(cb);
 			dev_source.attach();
 
-			update_interfaces();
+			print(@"WiiMote $(format_mac(mac)) connected\n");
+			update_interfaces(true);
 		}
 
 		~MainDevice() {
-			print("Device disconnected!\n");
+			debug("In MainDevice destructor");
 			if (dev_source != null)
 				dev_source.destroy();
 		}
 
-		private void update_interfaces() throws IOError {
+		private void update_interfaces(bool initial_call = false) throws IOError {
 			var available = dev.available();
 			var opened = dev.opened();
 			var unopened = available & ~opened;
@@ -63,68 +70,152 @@ namespace Linuxmotehook {
 
 			if (CORE in unopened && app.send_buttons) {
 				try {
-					debug("Opening core interface");
+					info("Opening core interface");
 					dev.open(CORE);
 				} catch(IOError e) {
-					print("Failed to open buttons interface: %s\n", e.message);
+					warning("Failed to open buttons interface: %s\n", e.message);
 				}
 			}
 
-			if (IR in unopened && app.send_ir) {
+			/*if (IR in unopened && app.send_ir) {
 				try {
-					debug("Opening IR interface");
+					info("Opening IR interface");
 					dev.open(IR);
 				} catch(IOError e) {
-					print("Failed to open IR interface: %s\n", e.message);
+					warning("Failed to open IR interface: %s\n", e.message);
 				}
-			}
+			}*/
 
 			if (ACCEL in unopened) {
 				try {
-					debug("Opening accelerometer interface");
+					info("Opening accelerometer interface");
 					dev.open(ACCEL);
 				} catch(IOError e) {
-					print("Failed to open accelerometer interface (motion won't work!): %s\n", e.message);
+					warning("Failed to open accelerometer interface (motion won't work!): %s\n", e.message);
 				}
 			}
 
 			if (MOTION_PLUS in unopened) {
 				try {
-					debug("Opening motion plus interface");
+					info("Opening motion plus interface");
 					dev.open(MOTION_PLUS);
 				} catch(IOError e) {
-					print("Failed to open Motion Plus interface: %s\n", e.message);
+					// Don't show warning here - it might happen for external MPs
 				}
 			}
 
-			opened = dev.opened();
-
-			// Update motion status
-
-			if (ACCEL in opened) {
-				if (MOTION_PLUS in opened) {
-					devtype = GYRO_FULL;
-				} else {
-					devtype = ACCELEROMETER_ONLY;
-				}
-			} else {
-				devtype = NO_MOTION;
-			}
+			update_motion_status(dev.opened());
 
 			// Clear unavailable interfaces
 			if (!(CORE in opened)) {
 				buttons = 0;
 			}
 
-			// TODO: clear other interfaces if they are no longer opened
+			if ((extension != null) && !(extension.implements_interface in opened)) {
+				extension.disconnected();
+				extension = null;
+			}
 
-			// Extension interfaces - those are mutally exclusive
-			// TODO: support them!
+			// Extension interfaces need some time to initialize
+
+			if (initial_call) {
+				update_external_interfaces();
+			} else {
+				GLib.Timeout.add(500, update_external_interfaces);
+			}
+		}
+
+		private bool update_external_interfaces() {
+			var available = dev.available();
+			var opened = dev.opened();
+			var unopened = available & ~opened;
+
+			// Since motion plus is available as pluggable extension, check for it here as well
+			if (MOTION_PLUS in unopened) {
+				try {
+					info("Opening motion plus interface");
+					dev.open(MOTION_PLUS);
+				} catch(IOError e) {
+					warning("Failed to open Motion Plus interface: %s\n", e.message);
+				}
+			}
+
+			update_motion_status(dev.opened());
+
+			if (NUNCHUK in unopened) {
+				try {
+					info("Opening nunchuck interface");
+					dev.open(NUNCHUK);
+					extension = new Nunchuck(this);
+				} catch(IOError e) {
+					warning("Failed to open nunchuck interface: %s\n", e.message);
+				}
+			}
+
+			if ((extension != null) && (extension.implements_interface in unopened)) {
+				unowned var server = new LMApplication().server;
+				if (server != null) {
+					try {
+						server.add_device(extension);
+					} catch(Cemuhook.ServerError.SERVER_FULL e) {
+						print(@"Can't add extension to wiimote $(format_mac(mac)) - server full!\n");
+					} catch(Error e) {
+						warning("Error adding extension to server: %s", e.message);
+					}
+				}
+			}
+
+			return Source.REMOVE;
+		}
+
+		private void update_motion_status(XWiimote.IfaceType opened) {
+			if (ACCEL in opened) {
+				if (MOTION_PLUS in opened) {
+					devtype = GYRO_FULL;
+				} else {
+					devtype = ACCELEROMETER_ONLY;
+
+					gyroscope = Cemuhook.MotionData() {
+						x = 0f,
+						y = 0f,
+						z = 0f
+					};
+				}
+			} else {
+				devtype = NO_MOTION;
+
+				accelerometer = Cemuhook.MotionData() {
+					x = 0f,
+					y = 0f,
+					z = 0f
+				};
+
+				gyroscope = Cemuhook.MotionData() {
+					x = 0f,
+					y = 0f,
+					z = 0f
+				};
+			}
+		}
+
+		public void on_added(Cemuhook.Server server) {
+			try {
+				if (extension != null) {
+					server.add_device(extension);
+				}
+			} catch(Cemuhook.ServerError.ALREADY_SERVING e) {
+				// This is expected
+			} catch(Cemuhook.ServerError.SERVER_FULL e) {
+				print(@"Can't add extension to wiimote $(format_mac(mac)) - server full!\n");
+			} catch(Error e) {
+				warning("Error adding extension to server: %s", e.message);
+			}
 		}
 
 		private bool process_incoming() {
 			try {
 				bool needs_update = false;
+				bool extension_needs_update = false;
 				for (var? ev = dev.poll(); ev != null; ev = dev.poll()) {
 					switch (ev.type) {
 						case KEY:
@@ -140,6 +231,11 @@ namespace Linuxmotehook {
 							process_gyroscope(ev.abs[0]);
 							needs_update = true;
 							break;
+						case NUNCHUK_KEY:
+						case NUNCHUK_MOVE:
+							extension.process_event(ev);
+							extension_needs_update = true;
+							break;
 						case WATCH:
 							update_interfaces();
 							needs_update = true;
@@ -147,14 +243,21 @@ namespace Linuxmotehook {
 						case GONE:
 							destroy();
 							return Source.REMOVE;
+						default:
+							warn_if_reached();
+							break;
 					}
 				}
 
 				if (needs_update) {
 					updated();
 				}
+
+				if (extension_needs_update) {
+					extension.updated();
+				}
 			} catch (Error e) {
-				print("Error when reading event: %s, disconnecting!\n", e.message);
+				warning("Error when reading event: %s, disconnecting!\n", e.message);
 				destroy();
 			}
 
@@ -237,7 +340,14 @@ namespace Linuxmotehook {
 		}
 
 		private void destroy() {
-			// TODO: signal disconnection for extension if used
+			if (mac != 0)
+				print(@"WiiMote $(format_mac(mac)) disconnected\n");
+
+			// TODO: signal disconnection for extension if one is present
+			if (extension != null) {
+				extension.disconnected();
+				extension = null;
+			}
 			disconnected();
 		}
 
@@ -267,7 +377,11 @@ namespace Linuxmotehook {
 
 		public Cemuhook.BaseData get_base_inputs() {
 			return Cemuhook.BaseData() {
-				buttons = buttons
+				buttons = buttons,
+				left_x = 127,
+				left_y = 127,
+				right_x = 127,
+				right_y = 127
 			};
 		}
 
