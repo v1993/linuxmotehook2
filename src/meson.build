@@ -13,7 +13,8 @@ linuxmotehook2_deps = [
   dependency('glib-2.0',      version: '>= 2.50'),
   dependency('gio-2.0',       version: '>= 2.50'),
   dependency('gio-unix-2.0',  version: '>= 2.50'),
-  dependency('gcemuhook-0.1'),
+
+  gcemuhook_dep,
 
   xwiimote_dep,
   meson.get_compiler('vala').find_library('xwiimote', dirs: xwiimote_vapi_dir),
