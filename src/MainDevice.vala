@@ -52,6 +52,7 @@ namespace Linuxmotehook {
 			dev_source.set_callback(cb);
 			dev_source.attach();
 
+			dev.set_mp_normalization(conf.gyro_calibration[0], conf.gyro_calibration[1], conf.gyro_calibration[2], 0);
 			update_interfaces(true);
 		}
 
@@ -334,9 +335,9 @@ namespace Linuxmotehook {
 
 		private void process_gyroscope(XWiimote.EventAbs inp) {
 			gyroscope = Cemuhook.MotionData() {
-				x = ((float)(inp.z + conf.gyro_calibration[2])) / GYRO_UNITS_PER_DEG_PER_SEC,
-				y = ((float)(inp.x + conf.gyro_calibration[0])) / GYRO_UNITS_PER_DEG_PER_SEC,
-				z = ((float)(inp.y + conf.gyro_calibration[1])) / GYRO_UNITS_PER_DEG_PER_SEC,
+				x = ((float)inp.z) / GYRO_UNITS_PER_DEG_PER_SEC,
+				y = ((float)inp.x) / GYRO_UNITS_PER_DEG_PER_SEC,
+				z = ((float)inp.y) / GYRO_UNITS_PER_DEG_PER_SEC,
 			};
 		}
 
