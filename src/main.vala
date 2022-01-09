@@ -82,7 +82,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 		try {
 			hold();
-			server = new Server();
+			server = new Server(config.port);
 		} catch(Error e) {
 			print("Failed to start server: %s\n", e.message);
 			return;

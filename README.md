@@ -1,6 +1,28 @@
 # Cemuhook UDP server for WiiMotes on Linux - successor to original linuxmotehook
 
-## This application is still in alpha state and has known issues as well as unfinished parts! Bug reports are not accepted.
+[![Ko-Fi](https://img.shields.io/badge/support-Ko--Fi-brightgreen)](https://ko-fi.com/v19930312)
+
+## Current features
+
+* Support for Wiimotes and Nunchucks
+* Support for calibration of gyro and nunchuck stick
+* Support for buttons/sticks as well as motion
+
+### Planned features - short-term
+
+* Support changing device orientation
+* GUI application to assist with calibration and configuration
+* Documentation for configuration files
+
+### Planned features - mid-term
+
+* CI for testing and deployment
+* PPA for easy installation and updates
+
+### Planned features - long-term
+
+* Support for reporting IR as touch (potentially useful with dolphin)
+* Support for more Wiimote extensions - if requested
 
 ## Quick build guide
 
