@@ -4,6 +4,7 @@ linuxmotehook2_sources = [
   'Nunchuck.vala',
   'Server.vala',
 
+  'Config.vala',
   'Utils.vala',
 
   'main.vala'
@@ -13,6 +14,7 @@ linuxmotehook2_deps = [
   dependency('glib-2.0',      version: '>= 2.50'),
   dependency('gio-2.0',       version: '>= 2.50'),
   dependency('gio-unix-2.0',  version: '>= 2.50'),
+  dependency('gee-0.8',       version: '>= 0.20'),
 
   gcemuhook_dep,
 

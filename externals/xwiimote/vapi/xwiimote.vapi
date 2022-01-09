@@ -173,28 +173,6 @@ namespace XWiimote {
 			return (!)device;
 		}
 
-		public uint64 get_mac() throws GLib.Error
-		ensures(result >> 48 == 0) {
-			// This is nowhere near fully optimized, but it really doesn't need to be
-			var uevent_file = GLib.File.new_build_filename(get_syspath(), "uevent");
-			var uevent_bytes = uevent_file.load_bytes();
-
-			var regex = /HID_UNIQ=([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]])/;
-			GLib.MatchInfo info = null;
-			if (!regex.match((string)uevent_bytes.get_data(), 0, out info) || info == null) {
-				throw new GLib.IOError.NOT_FOUND("HID_UNIQ record missing");
-			}
-
-			var builder = new GLib.StringBuilder.sized(12);
-			var matches = info.fetch_all()[1:];
-
-			foreach (var substr in matches) {
-				builder.append(substr);
-			}
-
-			return uint64.parse(builder.str, 16);
-		}
-
 		public unowned string get_syspath();
 
 		public int get_fd();

@@ -70,9 +70,19 @@ namespace Linuxmotehook {
 					return;
 				}
 
-				add_device(new MainDevice((owned)dev));
+				var mac = xwiimote_get_mac(dev);
+				var conf = new Config();
+
+				var? devconf = conf.get_device_config(mac);
+				if (devconf != null) {
+					print(@"Found wiimote $(format_mac(mac)) - connecting... ");
+					add_device(new MainDevice((owned)dev, (owned)devconf));
+					print("done!\n");
+				} else {
+					print(@"Wiimote $(format_mac(mac)) not in config - skipping\n");
+				}
 			} catch(Error e) {
-				warning("Failed to add wiimote: %s", e.message);
+				warning("Failed to setup wiimote: %s", e.message);
 			}
 		}
 	}

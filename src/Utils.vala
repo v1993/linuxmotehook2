@@ -18,6 +18,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-internal string format_mac(uint64 mac) {
-	return "0x%012llX".printf(mac);
+internal const string mac_fstring = "0x%012llX";
+internal string format_mac(uint64 mac)
+requires (mac >> 48 == 0) {
+	return mac_fstring.printf(mac);
+}
+
+internal uint64 xwiimote_get_mac(XWiimote.Device dev) throws GLib.Error
+ensures(result >> 48 == 0) {
+	// This is nowhere near fully optimized, but it really doesn't need to be
+	var uevent_file = GLib.File.new_build_filename(dev.get_syspath(), "uevent");
+	var uevent_bytes = uevent_file.load_bytes();
+
+	var regex = /HID_UNIQ=([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]]):([[:xdigit:]][[:xdigit:]])/;
+	GLib.MatchInfo info = null;
+	if (!regex.match((string)uevent_bytes.get_data(), 0, out info) || info == null) {
+		throw new GLib.IOError.NOT_FOUND("HID_UNIQ record missing");
+	}
+
+	var builder = new GLib.StringBuilder.sized(12);
+	var matches = info.fetch_all()[1:];
+
+	foreach (unowned var substr in matches) {
+		builder.append(substr);
+	}
+
+	return uint64.parse(builder.str, 16);
 }

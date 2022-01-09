@@ -20,6 +20,8 @@
 
 namespace Linuxmotehook {
 	class Nunchuck : ExtensionDevice {
+		private const float ACCEL_UNITS_PER_G = 205f;
+
 		private uint8 stick_x = 127;
 		private uint8 stick_y = 127;
 		private Cemuhook.Buttons buttons = 0;
@@ -33,11 +35,11 @@ namespace Linuxmotehook {
 
 		public Nunchuck(MainDevice parent) {
 			base(parent);
-			print("Nunchuck created\n");
+			debug("Nunchuck created\n");
 		}
 
 		~Nunchuck() {
-			print("Nunchuck destroyed\n");
+			debug("Nunchuck destroyed\n");
 		}
 
 		public override Cemuhook.DeviceType get_device_type() {
@@ -63,10 +65,9 @@ namespace Linuxmotehook {
 		}
 
 		public override void process_event(XWiimote.Event ev) {
-			var app = new LMApplication();
 			switch (ev.type) {
 				case NUNCHUK_KEY:
-					if (app.send_buttons) {
+					if (parent.conf.send_buttons) {
 						Cemuhook.Buttons btn;
 						switch(ev.key.code) {
 							case C:
@@ -93,19 +94,19 @@ namespace Linuxmotehook {
 					}
 					break;
 				case NUNCHUK_MOVE:
-					if (app.send_buttons) {
-						// TODO: apply calibration
+					if (parent.conf.send_buttons) {
 						var st = ev.abs[0];
-						stick_x = (uint8)(st.x + 127).clamp(0, 255);
-						stick_y = (uint8)(st.y + 127).clamp(0, 255);
+						unowned var calibr = parent.conf.nunchuck_stick_calibration;
+						stick_x = (uint8)((st.x - calibr[0]) * 127 / calibr[2] + 127).clamp(0, 255);
+						stick_y = (uint8)((st.y - calibr[1]) * 127 / calibr[3] + 127).clamp(0, 255);
 					}
-					// TODO: apply scaling, fix directions
+
 					motion_timestamp = ev.time_sec * 1000000 + ev.time_usec;
 					var motion = ev.abs[1];
 					accel = Cemuhook.MotionData() {
-						x =  (float)motion.x / app.NunchuckAccelUnitsPerG,
-						y = -(float)motion.z / app.NunchuckAccelUnitsPerG,
-						z = -(float)motion.y / app.NunchuckAccelUnitsPerG
+						x =  (float)motion.x / ACCEL_UNITS_PER_G,
+						y = -(float)motion.z / ACCEL_UNITS_PER_G,
+						z = -(float)motion.y / ACCEL_UNITS_PER_G
 					};
 					break;
 				default:

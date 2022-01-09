@@ -21,6 +21,7 @@
 namespace Linuxmotehook {
 	sealed class MainDevice: Object, Cemuhook.AbstractPhysicalDevice {
 		private XWiimote.Device dev;
+		public WiimoteConfig conf { get; private set; }
 		private UnixInputStream dev_stream;
 		private PollableSource dev_source;
 
@@ -31,23 +32,26 @@ namespace Linuxmotehook {
 		private Cemuhook.MotionData gyroscope = {0f, 0f, 0f};
 		private uint64 mac = 0;
 
+		private const float ACCEL_UNITS_PER_G = 102.5f;
+		private const float GYRO_UNITS_PER_DEG_PER_SEC = 189.5f;
+
 		private ExtensionDevice? extension = null;
 
 		construct {
 			added.connect(on_added);
 		}
 
-		public MainDevice(owned XWiimote.Device dev) throws Error {
-			this.dev = dev;
+		public MainDevice(owned XWiimote.Device _dev, owned WiimoteConfig _conf) throws Error {
+			dev = (owned)_dev;
+			conf = (owned)_conf;
 			dev.watch(true);
-			mac = dev.get_mac();
+			mac = xwiimote_get_mac(dev);
 			dev_stream = new UnixInputStream(dev.get_fd(), false);
 			dev_source = dev_stream.create_source();
 			PollableSourceFunc cb = process_incoming;
 			dev_source.set_callback(cb);
 			dev_source.attach();
 
-			print(@"WiiMote $(format_mac(mac)) connected\n");
 			update_interfaces(true);
 		}
 
@@ -64,11 +68,9 @@ namespace Linuxmotehook {
 			// Warn if some interfaces are opened yet not available
 			warn_if_fail(unopened == (available ^ opened));
 
-			var app = new LMApplication();
-
 			// WiiMote's own interfaces
 
-			if (CORE in unopened && app.send_buttons) {
+			if (CORE in unopened && conf.send_buttons) {
 				try {
 					info("Opening core interface");
 					dev.open(CORE);
@@ -77,7 +79,7 @@ namespace Linuxmotehook {
 				}
 			}
 
-			/*if (IR in unopened && app.send_ir) {
+			/*if (IR in unopened && conf.send_ir) {
 				try {
 					info("Opening IR interface");
 					dev.open(IR);
@@ -323,21 +325,18 @@ namespace Linuxmotehook {
 		}
 
 		private void process_accelerometer(XWiimote.EventAbs inp) {
-			var app = new LMApplication();
 			accelerometer = Cemuhook.MotionData() {
-				x =  ((float)inp.x) / app.AccelUnitsPerG,
-				y = -((float)inp.z) / app.AccelUnitsPerG,
-				z = -((float)inp.y) / app.AccelUnitsPerG,
+				x =  ((float)inp.x) / ACCEL_UNITS_PER_G,
+				y = -((float)inp.z) / ACCEL_UNITS_PER_G,
+				z = -((float)inp.y) / ACCEL_UNITS_PER_G,
 			};
 		}
 
 		private void process_gyroscope(XWiimote.EventAbs inp) {
-			var app = new LMApplication();
-			// TODO: apply per-device calibration (in place of zeros)
 			gyroscope = Cemuhook.MotionData() {
-				x =  ((float)(inp.z + 0)) / app.GyroUnitsPerDegPerSec,
-				y =  ((float)(inp.x + 0)) / app.GyroUnitsPerDegPerSec,
-				z =  ((float)(inp.y + 0)) / app.GyroUnitsPerDegPerSec,
+				x = ((float)(inp.z + conf.gyro_calibration[2])) / GYRO_UNITS_PER_DEG_PER_SEC,
+				y = ((float)(inp.x + conf.gyro_calibration[0])) / GYRO_UNITS_PER_DEG_PER_SEC,
+				z = ((float)(inp.y + conf.gyro_calibration[1])) / GYRO_UNITS_PER_DEG_PER_SEC,
 			};
 		}
 
@@ -345,7 +344,6 @@ namespace Linuxmotehook {
 			if (mac != 0)
 				print(@"WiiMote $(format_mac(mac)) disconnected\n");
 
-			// TODO: signal disconnection for extension if one is present
 			if (extension != null) {
 				extension.disconnected();
 				extension = null;
@@ -359,12 +357,13 @@ namespace Linuxmotehook {
 			try {
 				// Fully charged is about 71
 				// 4 LEDs up to about 33
+				// 3 LEDs up to about 25
 				var capacity = dev.get_battery();
 				if (capacity >= 40) {
 					return HIGH;
-				} else if (capacity >= 20) {
+				} else if (capacity >= 25) {
 					return MEDIUM;
-				} else if (capacity >= 10) {
+				} else if (capacity >= 15) {
 					return LOW;
 				} else {
 					return DYING;
