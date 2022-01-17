@@ -360,7 +360,9 @@ namespace Linuxmotehook {
 				// 4 LEDs up to about 33
 				// 3 LEDs up to about 25
 				var capacity = dev.get_battery();
-				if (capacity >= 40) {
+				if (capacity >= 50) {
+					return FULL;
+				} else if (capacity >= 35) {
 					return HIGH;
 				} else if (capacity >= 25) {
 					return MEDIUM;
