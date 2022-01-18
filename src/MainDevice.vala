@@ -382,10 +382,10 @@ namespace Linuxmotehook {
 		public Cemuhook.BaseData get_base_inputs() {
 			return Cemuhook.BaseData() {
 				buttons = buttons,
-				left_x = 127,
-				left_y = 127,
-				right_x = 127,
-				right_y = 127
+				left_x = Cemuhook.STICK_NEUTRAL,
+				left_y = Cemuhook.STICK_NEUTRAL,
+				right_x = Cemuhook.STICK_NEUTRAL,
+				right_y = Cemuhook.STICK_NEUTRAL
 			};
 		}
 

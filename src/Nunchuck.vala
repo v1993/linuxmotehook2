@@ -22,8 +22,8 @@ namespace Linuxmotehook {
 	class Nunchuck : ExtensionDevice {
 		private const float ACCEL_UNITS_PER_G = 205f;
 
-		private uint8 stick_x = 127;
-		private uint8 stick_y = 127;
+		private uint8 stick_x = Cemuhook.STICK_NEUTRAL;
+		private uint8 stick_y = Cemuhook.STICK_NEUTRAL;
 		private Cemuhook.Buttons buttons = 0;
 		private uint64 motion_timestamp = 0;
 		private Cemuhook.MotionData accel = {0f, 0f, 0f};
@@ -51,8 +51,8 @@ namespace Linuxmotehook {
 				buttons = buttons,
 				left_x = stick_x,
 				left_y = stick_y,
-				right_x = 127,
-				right_y = 127
+				right_x = Cemuhook.STICK_NEUTRAL,
+				right_y = Cemuhook.STICK_NEUTRAL
 			};
 		}
 
@@ -97,8 +97,8 @@ namespace Linuxmotehook {
 					if (parent.conf.send_buttons) {
 						var st = ev.abs[0];
 						unowned var calibr = parent.conf.nunchuck_stick_calibration;
-						stick_x = (uint8)((st.x - calibr[0]) * 127 / calibr[2] + 127).clamp(0, 255);
-						stick_y = (uint8)((st.y - calibr[1]) * 127 / calibr[3] + 127).clamp(0, 255);
+						stick_x = (uint8)((st.x - calibr[0]) * 127 / calibr[2] + Cemuhook.STICK_NEUTRAL).clamp(0, 255);
+						stick_y = (uint8)((st.y - calibr[1]) * 127 / calibr[3] + Cemuhook.STICK_NEUTRAL).clamp(0, 255);
 					}
 
 					motion_timestamp = ev.time_sec * 1000000 + ev.time_usec;
