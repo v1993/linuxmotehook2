@@ -1,8 +1,8 @@
 version: 2
 jobs:
-  build.lts:
+  build.main:
     docker:
-      - image: "ubuntu:latest"
+      - image: "ubuntu:rolling"
     steps:
       - run:
           name: Reloading apt indexes
@@ -30,7 +30,7 @@ workflows:
   version: 2
   build-all:
     jobs:
-      - build.lts:
+      - build.main:
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
