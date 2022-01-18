@@ -41,9 +41,9 @@ jobs:
           name: Building and packaging
           command: './.circleci/build-and-package.sh'
       - store_artifacts:
-          path: /tmp/artifacts
+          path: /tmp/persist/artifacts
       - persist_to_workspace:
-          root: /tmp/artifacts
+          root: /tmp/persist
           paths: './*'
 
 workflows:
