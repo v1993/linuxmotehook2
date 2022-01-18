@@ -38,7 +38,7 @@ jobs:
           paths:
               - "/var/cache/apt/archives"
       - run:
-          name: Creating bundle
+          name: Building and packaging
           command: './.circleci/build-and-package.sh'
       - store_artifacts:
           path: /tmp/artifacts

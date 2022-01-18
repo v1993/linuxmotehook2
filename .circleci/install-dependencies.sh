@@ -13,4 +13,4 @@ apt-get install -y build-essential \
     valac libgee-0.8-dev \
     meson \
     \
-    devscripts dput-ng jq basez
+    devscripts gpg dput-ng jq basez
