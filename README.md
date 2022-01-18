@@ -57,7 +57,7 @@ On Ubuntu and derivative the following should do:
 
 ```bash
 sudo add-apt-repository ppa:vala-team/next
-sudo apt-get install build-essentials \
+sudo apt-get install build-essential \
     libudev-dev zlib1g-dev \
     valac libgee-0.8-dev \  
     meson
