@@ -25,7 +25,7 @@ jobs:
           command: 'git submodule update --init --recursive --jobs 4'
       - restore_cache:
           keys:
-              - apt-package-cache-{{ checksum ".circleci/config.yml" }}
+              - apt-package-cache-{{ checksum ".circleci/install-dependencies.sh" }}
               - apt-package-cache
       - run:
           name: Installing dependencies
