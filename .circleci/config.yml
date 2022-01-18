@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build.lts:
+    docker:
+      - image: "ubuntu:latest"
+    steps:
+      - run:
+          name: Reloading apt indexes
+          command: 'apt-get update'
+      - run:
+          name: Installing git
+          command: 'apt-get install -y git'
+      - checkout
+      - run:
+          name: Checking out submodules
+          command: 'git submodule update --init --recursive --jobs 4'
+      - run:
+          name: Installing software-properties-common
+          command: 'apt-get install -y software-properties-common'
+      - run:
+          name: Adding Vala repository
+          command: 'add-apt-repository ppa:vala-team/next'
+      - run:
+          name: Installing dependencies
+          command: './.circleci/install-dependencies.sh'
+      - run:
+          name: Creating bundle
+          command: './.circleci/build-and-package.sh'
+      - store_artifacts:
+          path: /tmp/artifacts
+      - persist_to_workspace:
+          root: /tmp/artifacts
+          paths: './*'
+
+workflows:
+  version: 2
+  build-all:
+    jobs:
+      - build.lts:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/

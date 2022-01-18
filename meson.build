@@ -7,3 +7,5 @@ project('linuxmotehook2', ['c', 'vala'],
 
 subdir('externals')
 subdir('src')
+
+install_data('ExampleConfig.ini', install_dir : get_option('datadir') / 'linuxmotehook2')
