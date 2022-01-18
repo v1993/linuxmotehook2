@@ -15,12 +15,6 @@ jobs:
           name: Checking out submodules
           command: 'git submodule update --init --recursive --jobs 4'
       - run:
-          name: Installing software-properties-common
-          command: 'apt-get install -y software-properties-common'
-      - run:
-          name: Adding Vala repository
-          command: 'add-apt-repository ppa:vala-team/next'
-      - run:
           name: Installing dependencies
           command: './.circleci/install-dependencies.sh'
       - run:
