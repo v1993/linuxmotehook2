@@ -3,20 +3,40 @@ jobs:
   build.main:
     docker:
       - image: "ubuntu:rolling"
+    resource_class: medium
     steps:
       - run:
-          name: Reloading apt indexes
+          name: Reloading apt index
           command: 'apt-get update'
       - run:
-          name: Installing git
-          command: 'apt-get install -y git'
+          name: Configuring apt cache
+          command: |
+              echo 'APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+              echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >>/etc/apt/apt.conf.d/01keep-debs
+      - run:
+          name: Removing apt cache purge configuration
+          command: rm /etc/apt/apt.conf.d/docker-clean
+      - run:
+          name: Installing git and ca-certeficates
+          command: 'apt-get install -y git ca-certificates'
       - checkout
       - run:
           name: Checking out submodules
           command: 'git submodule update --init --recursive --jobs 4'
+      - restore_cache:
+          keys:
+              - apt-package-cache-{{ checksum ".circleci/config.yml" }}
+              - apt-package-cache
       - run:
           name: Installing dependencies
           command: './.circleci/install-dependencies.sh'
+      - run:
+          name: Cleaning outdated packages from apt cache
+          command: apt autoclean
+      - save_cache:
+          key: apt-package-cache-{{ checksum ".circleci/config.yml" }}
+          paths:
+              - "/var/cache/apt/archives"
       - run:
           name: Creating bundle
           command: './.circleci/build-and-package.sh'
