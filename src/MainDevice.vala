@@ -37,6 +37,8 @@ namespace Linuxmotehook {
 
 		private ExtensionDevice? extension = null;
 
+		public Cemuhook.DeviceOrientation orientation { get { return conf.orientation; } }
+
 		construct {
 			added.connect(on_added);
 		}
@@ -359,6 +361,7 @@ namespace Linuxmotehook {
 				// Fully charged is about 71
 				// 4 LEDs up to about 33
 				// 3 LEDs up to about 25
+				// 2 LEDs up to about 16
 				var capacity = dev.get_battery();
 				if (capacity >= 50) {
 					return FULL;

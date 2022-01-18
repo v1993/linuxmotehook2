@@ -21,7 +21,7 @@
 namespace Linuxmotehook {
 	public class WiimoteConfig: Object {
 		public int gyro_calibration[3];
-		//public Cemuhook.Orientation orientation;
+		public Cemuhook.DeviceOrientation orientation;
 		public bool send_buttons;
 		public int nunchuck_stick_calibration[4];
 
@@ -29,7 +29,7 @@ namespace Linuxmotehook {
 		// Also don't incherit from Object once that's done
 		construct {
 			gyro_calibration = {0, 0, 0};
-			//orientation = NORMAL;
+			orientation = NORMAL;
 			send_buttons = false;
 			nunchuck_stick_calibration = {0, 0, 80, 80};
 		}
@@ -60,6 +60,15 @@ namespace Linuxmotehook {
 			}
 		}
 
+		private Cemuhook.DeviceOrientation orientation_;
+		public Cemuhook.DeviceOrientation orientation {
+			get { return orientation_; }
+			set {
+				orientation_ = value;
+				kfile.set_uint64(MAIN_GROUP, "Orientation", value);
+			}
+		}
+
 		private bool send_buttons_ = false;
 		public bool send_buttons {
 			get { return send_buttons_; }
@@ -85,7 +94,12 @@ namespace Linuxmotehook {
 						case "Port":
 							port_ = (uint16)kfile.get_uint64(MAIN_GROUP, key);
 							break;
-						// TODO: handle orientation here
+						case "Orientation":
+							var orient = kfile.get_string(MAIN_GROUP, key);
+							if (!Cemuhook.DeviceOrientation.try_parse(orient, out orientation_)) {
+								warning("Unknown orientation %s", orient);
+							}
+							break;
 						case "SendButtons":
 							send_buttons_ = kfile.get_boolean(MAIN_GROUP, key);
 							break;
@@ -115,7 +129,7 @@ namespace Linuxmotehook {
 				assert((mac >> 48) == 0);
 
 				var conf = new WiimoteConfig();
-				// TODO: orientation
+				conf.orientation = orientation;
 				conf.send_buttons = send_buttons;
 
 				foreach (unowned string key in kfile.get_keys(group)) {
@@ -123,7 +137,12 @@ namespace Linuxmotehook {
 						case "GyroCalibration":
 							conf.gyro_calibration = kfile_get_integer_list_checked(kfile, group, key, 3);
 							break;
-						// TODO: orientation
+						case "Orientation":
+							var orient = kfile.get_string(group, key);
+							if (!Cemuhook.DeviceOrientation.try_parse(orient, out conf.orientation)) {
+								warning("Unknown orientation %s", orient);
+							}
+							break;
 						case "SendButtons":
 							conf.send_buttons = kfile.get_boolean(group, key);
 							break;
@@ -155,7 +174,7 @@ namespace Linuxmotehook {
 
 			var group = format_mac(mac);
 			kfile.set_integer_list(group, "GyroCalibration", conf.gyro_calibration);
-			// TODO: write orientation
+			kfile.set_string(group, "Orientation", conf.orientation.to_string());
 			kfile.set_boolean(group, "SendButtons", conf.send_buttons);
 			kfile.set_integer_list(group, "NunchuckStickCalibration", conf.nunchuck_stick_calibration);
 		}

@@ -33,6 +33,8 @@ namespace Linuxmotehook {
 			return parent.get_mac() ^ mac_bitmask;
 		}
 
+		public Cemuhook.DeviceOrientation orientation { get { return NORMAL; } }
+
 		public abstract Cemuhook.DeviceType get_device_type();
 		public abstract Cemuhook.BaseData get_base_inputs();
 		public abstract void process_event(XWiimote.Event ev);

@@ -7,10 +7,10 @@
 * Support for Wiimotes and Nunchucks
 * Support for calibration of gyro and nunchuck stick
 * Support for buttons/sticks as well as motion
+* Support for changing device orientation
 
 ### Planned features - short-term
 
-* Support changing device orientation
 * GUI application to assist with calibration and configuration
 * Documentation for configuration files
 
