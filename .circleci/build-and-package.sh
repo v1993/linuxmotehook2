@@ -30,7 +30,7 @@ printf '%s' "$LAUNCHPAD_KEY_BASE64" | base64 --decode | gpg --import --batch
 echo "Creating changelog"
 
 MAIN_VERSION=$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)
-DEBFULLNAME=v1993 DEBEMAIL=v19930312@gmail.com dch --create --package=linuxmotehook2 --newversion="${MAIN_VERSION}.$(date -u +%Y%m%d%H%M%S)" --distribution unstable -- 'New upstream commit'
+DEBFULLNAME=v1993 DEBEMAIL=v19930312@gmail.com dch --create --package=linuxmotehook2 --newversion="${MAIN_VERSION}.$(date -u +%Y%m%d%H%M%S)" --distribution $(lsb_release -cs) -- 'New upstream commit'
 
 echo "Building deb package"
 
