@@ -46,13 +46,13 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./ppa-publish "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
+                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
       - when:
           condition: << pipeline.git.tag >>
           steps:
             - run:
                 name: Publishing to release PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./ppa-publish "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
+                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
       - store_artifacts:
           path: /tmp/persist/artifacts
   build-lts:
@@ -101,13 +101,13 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: './ppa-publish "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
+                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
       - when:
           condition: << pipeline.git.tag >>
           steps:
             - run:
                 name: Publishing to release PPA
-                command: './ppa-publish "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
+                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
       - store_artifacts:
           path: /tmp/persist/artifacts
       - persist_to_workspace:
