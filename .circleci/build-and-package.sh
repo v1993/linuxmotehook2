@@ -42,4 +42,4 @@ rm -f /tmp/key_password
 
 echo "Uploading to launchpad"
 
-dput ppa:v19930312/linuxmotehook2-nightly ../*.changes
+dput ppa:v19930312/linuxmotehook2-testing ../*.changes
