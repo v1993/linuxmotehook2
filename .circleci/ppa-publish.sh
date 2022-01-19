@@ -21,7 +21,7 @@ echo "Building deb package"
 
 printf '%s' "$LAUNCHPAD_KEY_PASSWORD_BASE64" | base64 --decode > /tmp/key_password
 
-debuild -S -p"gpg --batch -v --pinentry-mode=loopback --passphrase-file=/tmp/key_password" -k"$LAUNCHPAD_KEY_ID" 
+debuild -S -p"gpg --batch --pinentry-mode=loopback --passphrase-file=/tmp/key_password" -k"$LAUNCHPAD_KEY_ID" 
 
 rm -f /tmp/key_password
 
