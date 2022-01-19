@@ -358,7 +358,7 @@ namespace Linuxmotehook {
 		public Cemuhook.ConnectionType get_connection_type() { return BLUETOOTH; }
 		public Cemuhook.BatteryStatus get_battery() {
 			try {
-				// Fully charged is about 71
+				// Fully charged is about 71 (52 for rechargable batteries)
 				// 4 LEDs up to about 33
 				// 3 LEDs up to about 25
 				// 2 LEDs up to about 16

@@ -34,12 +34,9 @@ DEBFULLNAME=v1993 DEBEMAIL=v19930312@gmail.com dch --create --package=linuxmoteh
 
 echo "Building deb package"
 
-echo "" > key_password
+printf '%s' "$LAUNCHPAD_KEY_PASSWORD_BASE64" | base64 --decode > key_password
 
-debuild -S -uc -us
-debsign \
-  -p"echo '' | gpg --batch -v --pinentry-mode loopback --passphrase-fd=0"\
-  -S -k"$LAUNCHPAD_KEY_ID" ../*.changes
+debuild -S -p"gpg --batch -v --pinentry-mode=loopback --passphrase-file=$(realpath key_password)" -k"$LAUNCHPAD_KEY_ID" 
 
 rm -f key_password
 
