@@ -4,6 +4,8 @@ jobs:
     docker:
       - image: "ubuntu:latest"
     resource_class: medium
+    environment:
+      CI_PIPELINE_NUMBER: << pipeline.number >>
     steps:
       - run:
           name: Reloading apt index
@@ -46,7 +48,7 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
+                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" "New upstream commit"'
       - when:
           condition: << pipeline.git.tag >>
           steps:
@@ -62,6 +64,8 @@ jobs:
     docker:
       - image: "ubuntu:rolling"
     resource_class: medium
+    environment:
+      CI_PIPELINE_NUMBER: << pipeline.number >>
     steps:
       - run:
           name: Reloading apt index
@@ -104,7 +108,7 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
+                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" "New upstream commit"'
       - when:
           condition: << pipeline.git.tag >>
           steps:
