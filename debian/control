@@ -2,7 +2,7 @@ Source: linuxmotehook2
 Section: utils
 Priority: optional
 Maintainer: v1993 <v19930312@gmail.com>
-Build-Depends: debhelper-compat (= 13), libudev-dev, zlib1g-dev, valac, libgee-0.8-dev, meson
+Build-Depends: debhelper-compat (= 12), libudev-dev, zlib1g-dev, valac, libgee-0.8-dev, meson
 Standards-Version: 4.5.1
 Homepage: https://github.com/v1993/linuxmotehook2
 Vcs-Browser: https://github.com/v1993/linuxmotehook2
