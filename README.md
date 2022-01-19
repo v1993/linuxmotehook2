@@ -1,5 +1,7 @@
 # Cemuhook UDP server for WiiMotes on Linux - successor to original linuxmotehook
 
+![CircleCI](https://img.shields.io/circleci/build/github/v1993/linuxmotehook2)
+[![Nightly PPA](https://img.shields.io/badge/Nightly%20builds-PPA-orange)](https://ko-fi.com/v19930312)
 [![Ko-Fi](https://img.shields.io/badge/support-Ko--Fi-brightgreen)](https://ko-fi.com/v19930312)
 
 ## Current features
@@ -13,11 +15,6 @@
 
 * GUI application to assist with calibration and configuration
 * Documentation for configuration files
-
-### Planned features - mid-term
-
-* CI for testing and deployment
-* PPA for easy installation and updates
 
 ### Planned features - long-term
 
