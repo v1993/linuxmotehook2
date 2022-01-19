@@ -1,60 +1,5 @@
 version: 2.1
 jobs:
-  build-rolling:
-    docker:
-      - image: "ubuntu:rolling"
-    resource_class: medium
-    steps:
-      - run:
-          name: Reloading apt index
-          command: 'apt-get update'
-      - run:
-          name: Configuring apt cache
-          command: |
-              echo 'APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-              echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >>/etc/apt/apt.conf.d/01keep-debs
-      - run:
-          name: Removing apt cache purge configuration
-          command: rm /etc/apt/apt.conf.d/docker-clean
-      - run:
-          name: Installing git and ca-certeficates
-          command: 'apt-get install -y git ca-certificates'
-      - checkout
-      - run:
-          name: Checking out submodules
-          command: 'git submodule update --init --recursive --jobs 4'
-      - restore_cache:
-          keys:
-              - apt-rolling-cache-{{ checksum ".circleci/install-dependencies.sh" }}
-              - apt-rolling-cache
-      - run:
-          name: Installing dependencies
-          command: './.circleci/install-dependencies.sh'
-      - run:
-          name: Cleaning outdated packages from apt cache
-          command: apt autoclean
-      - save_cache:
-          key: apt-rolling-cache-{{ checksum ".circleci/config.yml" }}
-          paths:
-              - "/var/cache/apt/archives"
-      - run:
-          name: Building and crating bundle
-          command: './.circleci/build-and-package.sh'
-      - when:
-          condition:
-            equal: [ main, << pipeline.git.branch >> ]
-          steps:
-            - run:
-                name: Publishing to testing PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
-      - when:
-          condition: << pipeline.git.tag >>
-          steps:
-            - run:
-                name: Publishing to release PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
-      - store_artifacts:
-          path: /tmp/persist/artifacts
   build-lts:
     docker:
       - image: "ubuntu:latest"
@@ -113,17 +58,71 @@ jobs:
       - persist_to_workspace:
           root: /tmp/persist
           paths: './*'
-    
+  build-rolling:
+    docker:
+      - image: "ubuntu:rolling"
+    resource_class: medium
+    steps:
+      - run:
+          name: Reloading apt index
+          command: 'apt-get update'
+      - run:
+          name: Configuring apt cache
+          command: |
+              echo 'APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+              echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >>/etc/apt/apt.conf.d/01keep-debs
+      - run:
+          name: Removing apt cache purge configuration
+          command: rm /etc/apt/apt.conf.d/docker-clean
+      - run:
+          name: Installing git and ca-certeficates
+          command: 'apt-get install -y git ca-certificates'
+      - checkout
+      - run:
+          name: Checking out submodules
+          command: 'git submodule update --init --recursive --jobs 4'
+      - restore_cache:
+          keys:
+              - apt-rolling-cache-{{ checksum ".circleci/install-dependencies.sh" }}
+              - apt-rolling-cache
+      - run:
+          name: Installing dependencies
+          command: './.circleci/install-dependencies.sh'
+      - run:
+          name: Cleaning outdated packages from apt cache
+          command: apt autoclean
+      - save_cache:
+          key: apt-rolling-cache-{{ checksum ".circleci/config.yml" }}
+          paths:
+              - "/var/cache/apt/archives"
+      - run:
+          name: Building and crating bundle
+          command: './.circleci/build-and-package.sh'
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >> ]
+          steps:
+            - run:
+                name: Publishing to testing PPA
+                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)+ci${CIRCLE_BUILD_NUM}" "New upstream commit"'
+      - when:
+          condition: << pipeline.git.tag >>
+          steps:
+            - run:
+                name: Publishing to release PPA
+                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/persist/build --projectinfo | jq -r .version)" "New upstream release"'
+      - store_artifacts:
+          path: /tmp/persist/artifacts
 
 workflows:
   version: 2
   build-all:
     jobs:
-      - build-rolling:
+      - build-lts:
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
-      - build-lts:
+      - build-rolling:
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
