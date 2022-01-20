@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-export DEBIAN_FRONTEND="noninteractive"
-export TZ="Etc/UTC"
-
 apt-get install -y software-properties-common
 
 add-apt-repository -y ppa:vala-team/next

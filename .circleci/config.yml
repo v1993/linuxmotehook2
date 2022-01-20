@@ -6,6 +6,8 @@ jobs:
     resource_class: medium
     environment:
       CI_PIPELINE_NUMBER: << pipeline.number >>
+      TZ: 'Etc/UTC'
+      DEBIAN_FRONTEND: 'noninteractive'
     steps:
       - run:
           name: Reload apt index
@@ -72,6 +74,8 @@ jobs:
     resource_class: medium
     environment:
       CI_PIPELINE_NUMBER: << pipeline.number >>
+      TZ: 'Etc/UTC'
+      DEBIAN_FRONTEND: 'noninteractive'
     steps:
       - run:
           name: Reload apt index
