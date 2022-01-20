@@ -15,4 +15,4 @@ apt-get install -y build-essential \
     valac libgee-0.8-dev \
     meson \
     \
-    devscripts gpg dput-ng jq basez debhelper distro-info
+    devscripts gpg dput-ng jq basez debhelper

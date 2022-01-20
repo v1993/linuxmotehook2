@@ -34,7 +34,7 @@ jobs:
           command: './.circleci/install-dependencies.sh'
       - run:
           name: Cleaning outdated packages from apt cache
-          command: apt autoclean
+          command: apt-get autoclean
       - save_cache:
           key: apt-lts-cache-{{ checksum ".circleci/config.yml" }}
           paths:
@@ -48,15 +48,24 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" "New upstream commit"'
+                command: |
+                    ./.circleci/ppa-publish.sh \
+                      "ppa:v19930312/linuxmotehook2-testing" \
+                      "$(meson introspect /tmp/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" \
+                      "New upstream commit"
       - when:
           condition: << pipeline.git.tag >>
           steps:
             - run:
                 name: Publishing to release PPA
-                command: './.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/build --projectinfo | jq -r .version)" "New upstream release"'
+                command: |
+                    ./.circleci/ppa-publish.sh \
+                      "ppa:v19930312/linuxmotehook2" \
+                      "$(meson introspect /tmp/build --projectinfo | jq -r .version)" \
+                      "New upstream release"
       - store_artifacts:
           path: /tmp/artifacts
+
   build-rolling:
     docker:
       - image: "ubuntu:rolling"
@@ -76,8 +85,15 @@ jobs:
           name: Removing apt cache purge configuration
           command: rm /etc/apt/apt.conf.d/docker-clean
       - run:
-          name: Installing git and ca-certeficates
-          command: 'apt-get install -y git ca-certificates'
+          name: Installing git and ca-certeficates (and distro-info)
+          command: 'apt-get install -y git ca-certificates distro-info'
+      - run:
+          name: Halting if we are LTS
+          command: |
+              if [[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]]; then
+                  echo "We are LTS - halting!"
+                  circleci-agent step halt
+              fi
       - checkout
       - run:
           name: Checking out submodules
@@ -91,7 +107,7 @@ jobs:
           command: './.circleci/install-dependencies.sh'
       - run:
           name: Cleaning outdated packages from apt cache
-          command: apt autoclean
+          command: apt-get autoclean
       - save_cache:
           key: apt-rolling-cache-{{ checksum ".circleci/config.yml" }}
           paths:
@@ -105,13 +121,21 @@ jobs:
           steps:
             - run:
                 name: Publishing to testing PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2-testing" "$(meson introspect /tmp/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" "New upstream commit"'
+                command: |
+                    ./.circleci/ppa-publish.sh \
+                      "ppa:v19930312/linuxmotehook2-testing" \
+                      "$(meson introspect /tmp/build --projectinfo | jq -r .version)+ci${CI_PIPELINE_NUMBER}" \
+                      "New upstream commit"
       - when:
           condition: << pipeline.git.tag >>
           steps:
             - run:
                 name: Publishing to release PPA
-                command: '[[ $(ubuntu-distro-info -s) == $(lsb_release -c) ]] || ./.circleci/ppa-publish.sh "ppa:v19930312/linuxmotehook2" "$(meson introspect /tmp/build --projectinfo | jq -r .version)" "New upstream release"'
+                command: |
+                    ./.circleci/ppa-publish.sh \
+                      "ppa:v19930312/linuxmotehook2" \
+                      "$(meson introspect /tmp/build --projectinfo | jq -r .version)" \
+                      "New upstream release"
       - store_artifacts:
           path: /tmp/artifacts
 
