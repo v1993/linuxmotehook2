@@ -148,10 +148,12 @@ workflows:
   build-all:
     jobs:
       - build-lts:
+          context: Launchpad
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
       - build-rolling:
+          context: Launchpad
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
