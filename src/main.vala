@@ -22,14 +22,6 @@ using Linuxmotehook;
 
 extern const string LM_VERSION;
 
-/*
-// To be implemented in gcemuhook
-enum DeviceOrientation {
-	NORAML,
-	SIDEWAYS,
-	NORMAL_INVERTED
-}*/
-
 [SingleInstance]
 class LMApplication : Application {
 	private bool exit_scheduled = false;
