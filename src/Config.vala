@@ -78,9 +78,20 @@ namespace Linuxmotehook {
 			}
 		}
 
+		private int gyro_normalization_factor_ = 50;
+		public int gyro_normalization_factor {
+			get { return gyro_normalization_factor_; }
+			set {
+				gyro_normalization_factor_ = value;
+				kfile.set_integer(MAIN_GROUP, "GyroNormalizationFactor", value);
+			}
+		}
+
 		construct {
 			kfile = new KeyFile();
 			kfile.set_list_separator(',');
+			// Note: this likely creates a circular reference because of lambdas
+			// Nobody really cares because we're single instance, but still
 			wiimote_configs = new Gee.HashMap<uint64?, WiimoteConfig>(
 				(key) => { return (uint)((key >> 32) ^ key); },
 				(key1, key2) => { return key1 == key2; }
@@ -102,6 +113,9 @@ namespace Linuxmotehook {
 							break;
 						case "SendButtons":
 							send_buttons_ = kfile.get_boolean(MAIN_GROUP, key);
+							break;
+						case "GyroNormalizationFactor":
+							gyro_normalization_factor_ = kfile.get_integer(MAIN_GROUP, key);
 							break;
 						default:
 							warning("Unknown configuration key %s", key);

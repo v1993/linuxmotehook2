@@ -54,7 +54,8 @@ namespace Linuxmotehook {
 			dev_source.set_callback(cb);
 			dev_source.attach();
 
-			dev.set_mp_normalization(conf.gyro_calibration[0], conf.gyro_calibration[1], conf.gyro_calibration[2], 0);
+			var app_conf = new Config();
+			dev.set_mp_normalization(conf.gyro_calibration[0], conf.gyro_calibration[1], conf.gyro_calibration[2], app_conf.gyro_normalization_factor);
 			update_interfaces(true);
 		}
 
