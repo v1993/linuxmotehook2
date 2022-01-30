@@ -24,6 +24,7 @@ namespace Linuxmotehook {
 		public Cemuhook.DeviceOrientation orientation;
 		public bool send_buttons;
 		public int nunchuck_stick_calibration[4];
+		public int classic_controller_stick_calibration[8];
 
 		// TODO: initialize fields directly once initializing from arrays is fixed
 		// Also don't incherit from Object once that's done
@@ -32,6 +33,7 @@ namespace Linuxmotehook {
 			orientation = NORMAL;
 			send_buttons = false;
 			nunchuck_stick_calibration = {0, 0, 80, 80};
+			classic_controller_stick_calibration = {0, 0, 25, 25, 0, 0, 25, 25};
 		}
 	}
 
@@ -163,6 +165,9 @@ namespace Linuxmotehook {
 						case "NunchuckStickCalibration":
 							conf.nunchuck_stick_calibration = kfile_get_integer_list_checked(kfile, group, key, 4);
 							break;
+						case "ClassicControllerStickCalibration":
+							conf.classic_controller_stick_calibration = kfile_get_integer_list_checked(kfile, group, key, 8);
+							break;
 						default:
 							warning("Unknown configuration key %s", key);
 							break;
@@ -191,6 +196,7 @@ namespace Linuxmotehook {
 			kfile.set_string(group, "Orientation", conf.orientation.to_string());
 			kfile.set_boolean(group, "SendButtons", conf.send_buttons);
 			kfile.set_integer_list(group, "NunchuckStickCalibration", conf.nunchuck_stick_calibration);
+			kfile.set_integer_list(group, "ClassicControllerStickCalibration", conf.classic_controller_stick_calibration);
 		}
 	}
 }

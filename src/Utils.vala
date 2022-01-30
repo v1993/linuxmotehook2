@@ -45,3 +45,11 @@ ensures(result >> 48 == 0) {
 
 	return uint64.parse(builder.str, 16);
 }
+
+internal uint8 apply_stick_calibration(int32 val, int32 center, int32 range) {
+	return (uint8)((val - center) * 127 / range + Cemuhook.STICK_NEUTRAL).clamp(0, 255);
+}
+
+internal uint8 apply_analog_calibration(int32 val, int32 range) {
+	return (uint8)(val * 255 / range).clamp(0, 255);
+}

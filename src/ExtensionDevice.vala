@@ -35,6 +35,8 @@ namespace Linuxmotehook {
 
 		public Cemuhook.DeviceOrientation orientation { get { return NORMAL; } }
 
+		public virtual void get_analog_inputs(ref Cemuhook.AnalogButtonsData abdata) {}
+
 		public abstract Cemuhook.DeviceType get_device_type();
 		public abstract Cemuhook.BaseData get_base_inputs();
 		public abstract void process_event(XWiimote.Event ev);

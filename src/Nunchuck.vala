@@ -97,8 +97,8 @@ namespace Linuxmotehook {
 					if (parent.conf.send_buttons) {
 						var st = ev.abs[0];
 						unowned var calibr = parent.conf.nunchuck_stick_calibration;
-						stick_x = (uint8)((st.x - calibr[0]) * 127 / calibr[2] + Cemuhook.STICK_NEUTRAL).clamp(0, 255);
-						stick_y = (uint8)((st.y - calibr[1]) * 127 / calibr[3] + Cemuhook.STICK_NEUTRAL).clamp(0, 255);
+						stick_x = apply_stick_calibration(st.x, calibr[0], calibr[2]);
+						stick_y = apply_stick_calibration(st.y, calibr[1], calibr[3]);
 					}
 
 					motion_timestamp = ev.time_sec * 1000000 + ev.time_usec;

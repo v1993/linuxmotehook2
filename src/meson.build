@@ -1,8 +1,10 @@
 linuxmotehook2_sources = [
   'ExtensionDevice.vala',
   'MainDevice.vala',
-  'Nunchuck.vala',
   'Server.vala',
+
+  'Nunchuck.vala',
+  'ClassicController.vala',
 
   'Config.vala',
   'Utils.vala',

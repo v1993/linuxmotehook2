@@ -160,6 +160,16 @@ namespace Linuxmotehook {
 				}
 			}
 
+			if (CLASSIC_CONTROLLER in unopened) {
+				try {
+					info("Opening classic controller interface");
+					dev.open(CLASSIC_CONTROLLER);
+					extension = new ClassicController(this);
+				} catch(IOError e) {
+					warning("Failed to open classic controller interface: %s\n", e.message);
+				}
+			}
+
 			if ((!initial_call) && (extension != null) && (extension.implements_interface in unopened)) {
 				unowned var server = new LMApplication().server;
 				if (server != null) {
@@ -241,6 +251,8 @@ namespace Linuxmotehook {
 							break;
 						case NUNCHUK_KEY:
 						case NUNCHUK_MOVE:
+						case CLASSIC_CONTROLLER_KEY:
+						case CLASSIC_CONTROLLER_MOVE:
 							extension.process_event(ev);
 							extension_needs_update = true;
 							break;
