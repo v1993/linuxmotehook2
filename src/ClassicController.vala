@@ -126,7 +126,7 @@ namespace Linuxmotehook {
 					break;
 
 				case HOME:
-					btn = PS;
+					btn = HOME;
 					break;
 				case MINUS:
 					btn = SHARE;

@@ -26,7 +26,13 @@ namespace Linuxmotehook {
 		private PollableSource dev_source;
 
 		private Cemuhook.DeviceType devtype = NO_MOTION;
-		private Cemuhook.Buttons buttons = 0;
+		private Cemuhook.BaseData base_data = Cemuhook.BaseData() {
+			buttons = 0,
+			left_x = Cemuhook.STICK_NEUTRAL,
+			left_y = Cemuhook.STICK_NEUTRAL,
+			right_x = Cemuhook.STICK_NEUTRAL,
+			right_y = Cemuhook.STICK_NEUTRAL
+		};
 		private uint64 motion_timestamp = 0;
 		private Cemuhook.MotionData accelerometer = {0f, 0f, 0f};
 		private Cemuhook.MotionData gyroscope = {0f, 0f, 0f};
@@ -81,6 +87,14 @@ namespace Linuxmotehook {
 				} catch(IOError e) {
 					warning("Failed to open buttons interface: %s\n", e.message);
 				}
+			} else if (PRO_CONTROLLER in unopened && conf.send_buttons) {
+				// Pro controller is a separate device rather than extension, so handle it here
+				try {
+					info("Opening pro controller interface");
+					dev.open(PRO_CONTROLLER);
+				} catch(IOError e) {
+					warning("Failed to open pro controller's interface: %s\n", e.message);
+				}
 			}
 
 			/*if (IR in unopened && conf.send_ir) {
@@ -113,8 +127,15 @@ namespace Linuxmotehook {
 			update_motion_status(dev.opened());
 
 			// Clear unavailable interfaces
-			if (!(CORE in opened)) {
-				buttons = 0;
+			if (!((CORE | PRO_CONTROLLER) in opened)) {
+				base_data.buttons = 0;
+			}
+
+			if (!(PRO_CONTROLLER in opened)) {
+				base_data.left_x = Cemuhook.STICK_NEUTRAL;
+				base_data.left_y = Cemuhook.STICK_NEUTRAL;
+				base_data.right_x = Cemuhook.STICK_NEUTRAL;
+				base_data.right_y = Cemuhook.STICK_NEUTRAL;
 			}
 
 			if ((extension != null) && !(extension.implements_interface in opened)) {
@@ -160,13 +181,16 @@ namespace Linuxmotehook {
 				}
 			}
 
-			if (CLASSIC_CONTROLLER in unopened) {
-				try {
-					info("Opening classic controller interface");
-					dev.open(CLASSIC_CONTROLLER);
-					extension = new ClassicController(this);
-				} catch(IOError e) {
-					warning("Failed to open classic controller interface: %s\n", e.message);
+			// Extensions that have no motion are only connected if send_buttons is enabled
+			if (conf.send_buttons) {
+				if (CLASSIC_CONTROLLER in unopened) {
+					try {
+						info("Opening classic controller interface");
+						dev.open(CLASSIC_CONTROLLER);
+						extension = new ClassicController(this);
+					} catch(IOError e) {
+						warning("Failed to open classic controller interface: %s\n", e.message);
+					}
 				}
 			}
 
@@ -238,6 +262,14 @@ namespace Linuxmotehook {
 					switch (ev.type) {
 						case KEY:
 							process_key(ev.key.code, ev.key.state);
+							needs_update = true;
+							break;
+						case PRO_CONTROLLER_KEY:
+							process_pro_controller_key(ev.key.code, ev.key.state);
+							needs_update = true;
+							break;
+						case PRO_CONTROLLER_MOVE:
+							process_pro_controller_movement(ev.abs[0], ev.abs[1]);
 							needs_update = true;
 							break;
 						case ACCEL:
@@ -330,14 +362,97 @@ namespace Linuxmotehook {
 
 			switch (state) {
 				case DOWN:
-					buttons |= btn;
+					base_data.buttons |= btn;
 					break;
 				case UP:
-					buttons &= ~btn;
+					base_data.buttons &= ~btn;
 					break;
 				case AUTOREPEAT:
 					break;
 			}
+		}
+
+		private void process_pro_controller_key(XWiimote.EventKeyCode code, XWiimote.EventKeyState state) {
+			Cemuhook.Buttons btn;
+			switch (code) {
+				case UP:
+					btn = UP;
+					break;
+				case RIGHT:
+					btn = RIGHT;
+					break;
+				case DOWN:
+					btn = DOWN;
+					break;
+				case LEFT:
+					btn = LEFT;
+					break;
+
+				case A:
+					btn = A;
+					break;
+				case B:
+					btn = B;
+					break;
+				case X:
+					btn = X;
+					break;
+				case Y:
+					btn = Y;
+					break;
+
+				case TR:
+					btn = R1;
+					break;
+				case TL:
+					btn = L1;
+					break;
+				case ZR:
+					btn = R2;
+					break;
+				case ZL:
+					btn = L2;
+					break;
+				case THUMBL:
+					btn = L3;
+					break;
+				case THUMBR:
+					btn = R3;
+					break;
+
+				case HOME:
+					btn = HOME;
+					break;
+				case MINUS:
+					btn = SHARE;
+					break;
+				case PLUS:
+					btn = OPTIONS;
+					break;
+
+				default:
+					warn_if_reached();
+					return;
+			}
+
+			switch (state) {
+				case DOWN:
+					base_data.buttons |= btn;
+					break;
+				case UP:
+					base_data.buttons &= ~btn;
+					break;
+				case AUTOREPEAT:
+					break;
+			}
+		}
+
+		private void process_pro_controller_movement(XWiimote.EventAbs left, XWiimote.EventAbs right) {
+			unowned var calibr = conf.pro_controller_stick_calibration;
+			base_data.left_x = apply_stick_calibration(left.x, calibr[0], calibr[2]);
+			base_data.left_y = apply_stick_calibration(left.y, calibr[1], calibr[3]);
+			base_data.right_x = apply_stick_calibration(right.x, calibr[4], calibr[6]);
+			base_data.right_y = apply_stick_calibration(right.y, calibr[5], calibr[7]);
 		}
 
 		private void process_accelerometer(XWiimote.EventAbs inp) {
@@ -396,13 +511,7 @@ namespace Linuxmotehook {
 		public uint64 get_mac() { return mac; }
 
 		public Cemuhook.BaseData get_base_inputs() {
-			return Cemuhook.BaseData() {
-				buttons = buttons,
-				left_x = Cemuhook.STICK_NEUTRAL,
-				left_y = Cemuhook.STICK_NEUTRAL,
-				right_x = Cemuhook.STICK_NEUTRAL,
-				right_y = Cemuhook.STICK_NEUTRAL
-			};
+			return base_data;
 		}
 
 		public uint64 get_motion_timestamp() {

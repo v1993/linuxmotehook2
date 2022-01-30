@@ -8,8 +8,8 @@
 
 ## Current features
 
-* Support for Wiimotes and Nunchucks
-* Support for calibration of gyro and nunchuck stick
+* Support for Wiimotes, Nunchucks, Classic and Pro Controllers
+* Support for calibration of gyro and sticks
 * Support for buttons/sticks as well as motion
 * Support for changing device orientation
 
