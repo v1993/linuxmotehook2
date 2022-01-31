@@ -255,6 +255,10 @@ namespace Linuxmotehook {
 		}
 
 		private bool process_incoming() {
+			/*
+			 * Sending key events instantly allows to win a little bit of latency.
+			 * This can't be done with motion and sticks due to their "spammy" nature.
+			 */
 			try {
 				bool needs_update = false;
 				bool extension_needs_update = false;
@@ -262,11 +266,13 @@ namespace Linuxmotehook {
 					switch (ev.type) {
 						case KEY:
 							process_key(ev.key.code, ev.key.state);
-							needs_update = true;
+							updated();
+							needs_update = false;
 							break;
 						case PRO_CONTROLLER_KEY:
 							process_pro_controller_key(ev.key.code, ev.key.state);
-							needs_update = true;
+							updated();
+							needs_update = false;
 							break;
 						case PRO_CONTROLLER_MOVE:
 							process_pro_controller_movement(ev.abs[0], ev.abs[1]);
@@ -282,8 +288,12 @@ namespace Linuxmotehook {
 							needs_update = true;
 							break;
 						case NUNCHUK_KEY:
-						case NUNCHUK_MOVE:
 						case CLASSIC_CONTROLLER_KEY:
+							extension.process_event(ev);
+							extension.updated();
+							extension_needs_update = false;
+							break;
+						case NUNCHUK_MOVE:
 						case CLASSIC_CONTROLLER_MOVE:
 							extension.process_event(ev);
 							extension_needs_update = true;
