@@ -22,8 +22,7 @@ namespace Linuxmotehook {
 	sealed class Server: Cemuhook.Server {
 		private XWiimote.Monitor monitor;
 
-		private UnixInputStream monitor_stream;
-		private PollableSource monitor_source;
+		private IOSource monitor_source;
 
 		public Server(uint16 port = 26760, MainContext? context = null) throws GLib.Error {
 			base(port, context);
@@ -33,10 +32,9 @@ namespace Linuxmotehook {
 				monitor = XWiimote.Monitor.create(true, true);
 			}
 			assert_nonnull(monitor);
-			monitor_stream = new UnixInputStream(monitor.get_fd(), false);
-			monitor_source = monitor_stream.create_source();
+			monitor_source = new IOSource(new IOChannel.unix_new(monitor.get_fd()), IN);
 			// The following produces a warning, and it is intended
-			PollableSourceFunc cb = add_available_wiimotes;
+			IOFunc cb = add_available_wiimotes;
 			monitor_source.set_callback(cb);
 			monitor_source.attach(context);
 

@@ -22,8 +22,7 @@ namespace Linuxmotehook {
 	sealed class MainDevice: Object, Cemuhook.AbstractPhysicalDevice {
 		private XWiimote.Device dev;
 		public WiimoteConfig conf { get; private set; }
-		private UnixInputStream dev_stream;
-		private PollableSource dev_source;
+		private IOSource dev_source;
 
 		private Cemuhook.DeviceType devtype = NO_MOTION;
 		private Cemuhook.BaseData base_data = Cemuhook.BaseData() {
@@ -54,9 +53,8 @@ namespace Linuxmotehook {
 			conf = (owned)_conf;
 			dev.watch(true);
 			mac = xwiimote_get_mac(dev);
-			dev_stream = new UnixInputStream(dev.get_fd(), false);
-			dev_source = dev_stream.create_source();
-			PollableSourceFunc cb = process_incoming;
+			dev_source = new IOSource(new IOChannel.unix_new(dev.get_fd()), IN);
+			IOFunc cb = process_incoming;
 			dev_source.set_callback(cb);
 			dev_source.attach();
 
