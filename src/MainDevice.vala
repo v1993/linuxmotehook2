@@ -34,6 +34,7 @@ namespace Linuxmotehook {
 		};
 		private uint64 motion_timestamp = 0;
 		private Cemuhook.MotionData accelerometer = {0f, 0f, 0f};
+		private bool gen2_axis_mapping = true; // Gen 2 wiimotes apparently have different axis mapping compared to their gen 1 counterparts
 		private Cemuhook.MotionData gyroscope = {0f, 0f, 0f};
 		private uint64 mac = 0;
 
@@ -53,6 +54,8 @@ namespace Linuxmotehook {
 			conf = (owned)_conf;
 			dev.watch(true);
 			mac = xwiimote_get_mac(dev);
+			gen2_axis_mapping = dev.get_devtype() == "gen20";
+			info("Use gen2 axis mapping: %s", gen2_axis_mapping ? "true" : "false");
 			dev_source = new IOSource(new IOChannel.unix_new(dev.get_fd()), IN);
 			IOFunc cb = process_incoming;
 			dev_source.set_callback(cb);
@@ -464,11 +467,19 @@ namespace Linuxmotehook {
 		}
 
 		private void process_accelerometer(XWiimote.EventAbs inp) {
-			accelerometer = Cemuhook.MotionData() {
-				x =  ((float)inp.x) / ACCEL_UNITS_PER_G,
-				y = -((float)inp.z) / ACCEL_UNITS_PER_G,
-				z = -((float)inp.y) / ACCEL_UNITS_PER_G,
-			};
+			if (gen2_axis_mapping) {
+				accelerometer = Cemuhook.MotionData() {
+					x =  ((float)inp.x) / ACCEL_UNITS_PER_G,
+					y = -((float)inp.z) / ACCEL_UNITS_PER_G,
+					z = -((float)inp.y) / ACCEL_UNITS_PER_G,
+				};
+			} else {
+				accelerometer = Cemuhook.MotionData() {
+					x = -((float)inp.x) / ACCEL_UNITS_PER_G,
+					y =  ((float)inp.z) / ACCEL_UNITS_PER_G,
+					z = -((float)inp.y) / ACCEL_UNITS_PER_G,
+				};
+			}
 		}
 
 		private void process_gyroscope(XWiimote.EventAbs inp) {
