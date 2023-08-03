@@ -1,8 +1,9 @@
 # Cemuhook UDP server for WiiMotes on Linux - successor to original linuxmotehook
 
+![GitHub Actions - Build Status](https://img.shields.io/github/actions/workflow/status/v1993/linuxmotehook2/meson.yml)
 [![Ko-Fi](https://img.shields.io/badge/support-Ko--Fi-brightgreen)](https://ko-fi.com/v19930312)
 
-**PPAs are not updated for the time being due to Circle CI ceasing all operations in Russia (including free plan). I'll probably move to GitHub Actions if I'll ever get to it.**
+**PPAs are not updated for the time being - old workflow got broken by Circle CI and I'm not very interested in recreating it with GitHub actions due to moving to Manjaro myself. Feel free to indicate that there's demand by starting a discussion.**
 
 ## Current features
 
@@ -26,10 +27,10 @@
 ```bash
 git clone --recursive https://github.com/v1993/linuxmotehook2.git
 cd linuxmotehook2
-meson --buildtype=release -Db_lto=true --prefix=/usr build
-ninja -C build
+meson setup --buildtype=release -Db_lto=true --prefix=/usr build
+meson compile -C build
 # Optional
-ninja -C build install
+meson install -C build
 ```
 
 ### Updating
@@ -37,23 +38,22 @@ ninja -C build install
 cd linuxmotehook2
 git pull
 git submodule update --recursive --init
-ninja -C build
+meson compile -C build
 # Optional
-ninja -C build install
+meson install -C build
 ```
 
 ## Dependencies
 * libudev
 * GLib 2.50+
 * zlib
-* Vala 0.54+ and libgee-0.8 (Ubuntu and derivatives should use [Vala Next PPA](https://launchpad.net/~vala-team/+archive/ubuntu/next))
-* meson and ninja
+* Vala 0.56+ and libgee-0.8
+* meson
 * GCC/Clang
 
 On Ubuntu and derivative the following should do:
 
 ```bash
-sudo add-apt-repository ppa:vala-team/next
 sudo apt-get install build-essential \
     libudev-dev zlib1g-dev \
     valac libgee-0.8-dev \  
