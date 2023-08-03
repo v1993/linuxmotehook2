@@ -198,7 +198,7 @@ namespace Linuxmotehook {
 					try {
 						server.add_device(extension);
 					} catch(Cemuhook.ServerError.SERVER_FULL e) {
-						print(@"Can't add extension to wiimote $(format_mac(mac)) - server full!\n");
+						print("Can't add extension to wiimote %s - server full!\n", format_mac(mac));
 					} catch(Error e) {
 						warning("Error adding extension to server: %s", e.message);
 					}
@@ -246,7 +246,7 @@ namespace Linuxmotehook {
 			} catch(Cemuhook.ServerError.ALREADY_SERVING e) {
 				// This is expected
 			} catch(Cemuhook.ServerError.SERVER_FULL e) {
-				print(@"Can't add extension to wiimote $(format_mac(mac)) - server full!\n");
+				print("Can't add extension to wiimote %s - server full!\n", format_mac(mac));
 			} catch(Error e) {
 				warning("Error adding extension to server: %s", e.message);
 			}
@@ -481,7 +481,7 @@ namespace Linuxmotehook {
 
 		private void destroy() {
 			if (mac != 0)
-				print(@"WiiMote $(format_mac(mac)) disconnected\n");
+				print("WiiMote %s disconnected\n", format_mac(mac));
 
 			if (extension != null) {
 				extension.disconnected();

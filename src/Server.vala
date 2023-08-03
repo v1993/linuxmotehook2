@@ -73,11 +73,11 @@ namespace Linuxmotehook {
 
 				var? devconf = conf.get_device_config(mac);
 				if (devconf != null) {
-					print(@"Found wiimote $(format_mac(mac)) - connecting... ");
+					print("Found wiimote %s - connecting... ", format_mac(mac));
 					add_device(new MainDevice((owned)dev, (owned)devconf));
 					print("done!\n");
 				} else {
-					print(@"Wiimote $(format_mac(mac)) not in config - skipping\n");
+					print("Wiimote %s not in config - skipping\n", format_mac(mac));
 				}
 			} catch(Error e) {
 				warning("Failed to setup wiimote: %s", e.message);
