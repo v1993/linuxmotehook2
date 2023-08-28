@@ -20,7 +20,7 @@ linuxmotehook2_deps = [
   gcemuhook_dep,
 
   xwiimote_dep,
-  meson.get_compiler('vala').find_library('xwiimote', dirs: xwiimote_vapi_dir),
+  meson.get_compiler('vala').find_library('xwiimote', dirs: extra_vapi_dir),
 ]
 
 linuxmotehook2 = executable ('linuxmotehook2', linuxmotehook2_sources,
@@ -29,7 +29,6 @@ linuxmotehook2 = executable ('linuxmotehook2', linuxmotehook2_sources,
 
   vala_args: [
     #'--enable-experimental-non-null',
-    '--vapidir', xwiimote_vapi_dir
   ],
 
   c_args: [

@@ -1,6 +1,0 @@
-[submodule "externals/xwiimote/src"]
-	path = externals/xwiimote/src
-	url = https://github.com/v1993/xwiimote.git
-[submodule "externals/gcemuhook"]
-	path = subprojects/gcemuhook
-	url = https://github.com/v1993/gcemuhook.git

@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/v1993/xwiimote.git
+push-url = git@github.com:v1993/xwiimote.git
+revision = 8c3a4bf45d8699ca1369613c3c10eb32c3a7c71a
+depth = 1
+
+patch_directory = xwiimote
