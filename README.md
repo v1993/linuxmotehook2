@@ -3,6 +3,8 @@
 ![GitHub Actions - Build Status](https://img.shields.io/github/actions/workflow/status/v1993/linuxmotehook2/meson.yml)
 [![Ko-Fi](https://img.shields.io/badge/support-Ko--Fi-brightgreen)](https://ko-fi.com/v19930312)
 
+[![AUR git package](https://img.shields.io/badge/aur-git-blue)](https://aur.archlinux.org/packages/linuxmotehook2-git)
+
 **PPAs are not updated for the time being - old workflow got broken by Circle CI and I'm not very interested in recreating it with GitHub actions due to moving to Manjaro myself. Feel free to indicate that there's demand by starting a discussion.**
 
 ## Current features
