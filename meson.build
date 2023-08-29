@@ -17,4 +17,4 @@ gcemuhook_dep  = gcemuhook_proj.get_variable('gcemuhook_dep')
 
 subdir('src')
 
-install_data('ExampleConfig.ini', install_dir : get_option('datadir') / 'linuxmotehook2')
+install_data('ExampleConfig.ini', install_dir : get_option('datadir') / 'doc' / 'linuxmotehook2')
