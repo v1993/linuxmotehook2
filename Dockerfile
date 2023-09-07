@@ -10,7 +10,7 @@ ARG BUILD_TYPE=release
 ARG ENABLE_LTO=true
 
 RUN meson setup \
-      --fatal-meson-warnings
+      --fatal-meson-warnings \
       "--buildtype=${BUILD_TYPE}" \
       "-Db_lto=${ENABLE_LTO}" \
       "--prefix=/usr" \
