@@ -39,6 +39,7 @@ meson install -C build
 ```bash
 cd linuxmotehook2
 git pull
+meson subprojects update
 meson compile -C build
 # Optional
 meson install -C build
