@@ -35,7 +35,7 @@ namespace Linuxmotehook {
 		private uint64 motion_timestamp = 0;
 		private Cemuhook.MotionData accelerometer = {0f, 0f, 0f};
 		private Cemuhook.MotionData gyroscope = {0f, 0f, 0f};
-		private uint64 mac = 0;
+		private uint64 mac = Cemuhook.MAC_UNAVAILABLE;
 
 		private const float ACCEL_UNITS_PER_G = 102.5f;
 		private const float GYRO_UNITS_PER_DEG_PER_SEC = 189.5f;
@@ -480,7 +480,7 @@ namespace Linuxmotehook {
 		}
 
 		private void destroy() {
-			if (mac != 0)
+			if (mac != Cemuhook.MAC_UNAVAILABLE)
 				print("WiiMote %s disconnected\n", format_mac(mac));
 
 			if (extension != null) {

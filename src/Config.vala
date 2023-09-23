@@ -143,7 +143,7 @@ namespace Linuxmotehook {
 				}
 
 				var mac = uint64.parse(minfo.fetch(1), 16);
-				assert(mac != 0);
+				assert(mac != Cemuhook.MAC_UNAVAILABLE);
 				assert((mac >> 48) == 0);
 
 				var conf = new WiimoteConfig();
