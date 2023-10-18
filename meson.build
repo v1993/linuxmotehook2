@@ -1,5 +1,5 @@
 project('linuxmotehook2', ['c', 'vala'],
-          version: '0.1.5',
+          version: '0.2.0',
     meson_version: '>= 0.55.0',
   default_options: [
                      'warning_level=2',
