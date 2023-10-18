@@ -32,7 +32,7 @@ namespace Linuxmotehook {
 		construct {
 			gyro_calibration = {0, 0, 0};
 			orientation = NORMAL;
-			send_buttons = false;
+			send_buttons = true;
 			nunchuck_stick_calibration = {0, 0, 80, 80};
 			classic_controller_stick_calibration = {0, 0, 25, 25, 0, 0, 25, 25};
 			pro_controller_stick_calibration = {0, 0, 1000, 1000, 0, 0, 1000, 1000};
@@ -73,7 +73,7 @@ namespace Linuxmotehook {
 			}
 		}
 
-		private bool send_buttons_ = false;
+		private bool send_buttons_ = true;
 		public bool send_buttons {
 			get { return send_buttons_; }
 			set {
