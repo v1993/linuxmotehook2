@@ -28,7 +28,7 @@ namespace Linuxmotehook {
 		public int pro_controller_stick_calibration[8];
 
 		// TODO: initialize fields directly once initializing from arrays is fixed
-		// Also don't incherit from Object once that's done
+		// Also don't inherit from Object once that's done
 		construct {
 			gyro_calibration = {0, 0, 0};
 			orientation = NORMAL;
@@ -36,6 +36,11 @@ namespace Linuxmotehook {
 			nunchuck_stick_calibration = {0, 0, 80, 80};
 			classic_controller_stick_calibration = {0, 0, 25, 25, 0, 0, 25, 25};
 			pro_controller_stick_calibration = {0, 0, 1000, 1000, 0, 0, 1000, 1000};
+		}
+
+		public WiimoteConfig(Config global_conf) {
+			send_buttons = global_conf.send_buttons;
+			orientation = global_conf.orientation;
 		}
 	}
 
@@ -54,6 +59,15 @@ namespace Linuxmotehook {
 		public KeyFile kfile { get; construct; }
 
 		private Gee.HashMap<uint64?, WiimoteConfig> wiimote_configs;
+
+		private bool allowlist_mode_ = false;
+		public bool allowlist_mode {
+			get { return allowlist_mode_; }
+			set {
+				allowlist_mode_ = value;
+				kfile.set_boolean(MAIN_GROUP, "AllowlistMode", value);
+			}
+		}
 
 		private uint16 port_ = 26760;
 		public uint16 port {
@@ -109,6 +123,9 @@ namespace Linuxmotehook {
 						case "Port":
 							port_ = (uint16)kfile.get_uint64(MAIN_GROUP, key);
 							break;
+						case "AllowlistMode":
+							allowlist_mode_ = kfile.get_boolean(MAIN_GROUP, key);
+							break;
 						case "Orientation":
 							var orient = kfile.get_string(MAIN_GROUP, key);
 							if (!Cemuhook.DeviceOrientation.try_parse(orient, out orientation_)) {
@@ -146,9 +163,7 @@ namespace Linuxmotehook {
 				assert(mac != Cemuhook.MAC_UNAVAILABLE);
 				assert((mac >> 48) == 0);
 
-				var conf = new WiimoteConfig();
-				conf.orientation = orientation;
-				conf.send_buttons = send_buttons;
+				var conf = new WiimoteConfig(this);
 
 				foreach (unowned string key in kfile.get_keys(group)) {
 					switch(key) {
@@ -189,7 +204,7 @@ namespace Linuxmotehook {
 				return wiimote_configs[mac];
 			}
 
-			return null;
+			return allowlist_mode ? null : new WiimoteConfig(this);
 		}
 
 		public void set_device_config(uint64 mac, WiimoteConfig conf)

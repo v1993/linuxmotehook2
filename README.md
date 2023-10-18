@@ -18,6 +18,12 @@
 * Support for reporting IR as touch (potentially useful with dolphin)
 * Support for more Wiimote extensions - if requested
 
+## Configuration
+
+No configuration file is required to get started - just run without any arguments to expose all Wiimotes with default settings.
+However, you may want one for changing port, controller orientation, or something else.
+Check out [wiki](https://github.com/v1993/linuxmotehook2/wiki) for information on how to write a configuration file.
+
 ## Quick build guide
 
 ```bash
@@ -56,6 +62,3 @@ sudo apt-get install build-essential \
     meson
 ```
 
-## Configuration
-
-Check out [wiki](https://github.com/v1993/linuxmotehook2/wiki) for information on how to write configuration file.
