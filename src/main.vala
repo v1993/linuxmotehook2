@@ -79,7 +79,7 @@ the Free Software Foundation, either version 3 of the License, or
 		}
 
 		if (config.allowlist_mode) {
-			print("Allowlist mode enabled - only devices with a section in config will be served.\n");
+			print("Allowlist mode enabled - only Wiimotes with a section in config will be served.\n");
 		}
 
 		activate();
