@@ -5,8 +5,6 @@
 
 [![AUR git package](https://img.shields.io/badge/aur-linuxmotehook2--git-blue)](https://aur.archlinux.org/packages/linuxmotehook2-git)
 
-**PPAs are not updated for the time being - old workflow got broken by Circle CI and I'm not very interested in recreating it with GitHub actions due to moving to Manjaro myself. Feel free to indicate that there's demand by starting a discussion.**
-
 ## Current features
 
 * Support for Wiimotes, Nunchucks, Classic and Pro Controllers
@@ -14,13 +12,9 @@
 * Support for buttons/sticks as well as motion
 * Support for changing device orientation
 
-### Planned features - short-term
+### Planned features
 
 * GUI application to assist with calibration and configuration
-* Documentation for configuration files
-
-### Planned features - long-term
-
 * Support for reporting IR as touch (potentially useful with dolphin)
 * Support for more Wiimote extensions - if requested
 
