@@ -3,7 +3,7 @@
 ![GitHub Actions - Build Status](https://img.shields.io/github/actions/workflow/status/v1993/linuxmotehook2/meson.yml)
 [![Ko-Fi](https://img.shields.io/badge/support-Ko--Fi-brightgreen)](https://ko-fi.com/v19930312)
 
-[![AppImage](https://img.shields.io/badge/AppImage-x86__64%2FARM64-blue)](https://github.com/v1993/evdevhook2/releases/latest)
+[![AppImage](https://img.shields.io/badge/AppImage-x86__64%2FARM64-blue)](https://github.com/v1993/linuxmotehook2/releases/latest)
 [![AUR git package](https://img.shields.io/badge/aur-linuxmotehook2--git-blue)](https://aur.archlinux.org/packages/linuxmotehook2-git)
 
 ## Current features
